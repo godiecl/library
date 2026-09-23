@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library — Monolith</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+<div id="notifications" style="position: fixed; top: 1rem; right: 1rem; width: 22rem; z-index: 100;"></div>
+<nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item has-text-weight-bold" href="/">
+            <span class="icon"><i class="fas fa-book-open"></i></span>
+            <span>Library</span>
+        </a>
+    </div>
+    <div class="navbar-end">
+        <div class="navbar-item">
+            <span class="tag is-info is-light">Monolith</span>
+        </div>
+    </div>
+</nav>
+
+<section class="hero is-info is-bold">
+    <div class="hero-body">
+        <div class="container">
+            <p class="title"><i class="fas fa-book-bookmark"></i> Library Management</p>
+            <p class="subtitle">Catalog books, manage members, and track loans and reservations.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section py-4">
+    <div class="container">
+        <div class="columns is-multiline is-variable is-2">
+            <div class="column is-3">
+                <div class="box has-text-centered mb-0">
+                    <p class="heading has-text-grey">Books</p>
+                    <p class="title is-3 mb-0" id="stat-books">0</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered mb-0">
+                    <p class="heading has-text-grey">Members</p>
+                    <p class="title is-3 mb-0" id="stat-members">0</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered mb-0">
+                    <p class="heading has-text-grey">Active loans</p>
+                    <p class="title is-3 mb-0" id="stat-loans">0</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered mb-0">
+                    <p class="heading has-text-grey">Overdue</p>
+                    <p class="title is-3 mb-0 has-text-danger" id="stat-overdue">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section pt-4">
+    <div class="container">
+        <div class="tabs is-boxed">
+            <ul>
+                <li class="is-active" data-tab="books"><a><span class="icon is-small"><i class="fas fa-book"></i></span><span>Books</span></a>
+                </li>
+                <li data-tab="members"><a><span class="icon is-small"><i
+                        class="fas fa-users"></i></span><span>Members</span></a></li>
+                <li data-tab="loans"><a><span class="icon is-small"><i
+                        class="fas fa-right-left"></i></span><span>Loans</span></a></li>
+                <li data-tab="reservations"><a><span class="icon is-small"><i class="fas fa-clock"></i></span><span>Reservations</span></a>
+                </li>
+            </ul>
+        </div>
+
+        <div id="tab-books" class="tab-pane">
+            <form id="book-form" class="box">
+                <p class="title is-6 mb-3"><span class="icon"><i class="fas fa-plus"></i></span>Add a book</p>
+                <div class="columns is-multiline is-variable is-2">
+                    <div class="column is-3">
+                        <div class="field"><label class="label">Title</label>
+                            <div class="control"><input class="input" name="title" placeholder="Clean Code" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-3">
+                        <div class="field"><label class="label">Author</label>
+                            <div class="control"><input class="input" name="author" placeholder="Robert C. Martin"
+                                                        required></div>
+                        </div>
+                    </div>
+                    <div class="column is-3">
+                        <div class="field"><label class="label">ISBN</label>
+                            <div class="control"><input class="input" name="isbn" placeholder="9780132350884" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-2">
+                        <div class="field"><label class="label">Copies</label>
+                            <div class="control"><input class="input" name="totalCopies" type="number" min="1"
+                                                        placeholder="1" required></div>
+                        </div>
+                    </div>
+                    <div class="column is-1 is-flex is-align-items-flex-end">
+                        <div class="field mb-0">
+                            <div class="control">
+                                <button class="button is-info is-fullwidth"><span class="icon"><i
+                                        class="fas fa-plus"></i></span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>ISBN</th>
+                        <th>Total</th>
+                        <th>Available</th>
+                    </tr>
+                    </thead>
+                    <tbody id="books-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-members" class="tab-pane is-hidden">
+            <form id="member-form" class="box">
+                <p class="title is-6 mb-3"><span class="icon"><i class="fas fa-user-plus"></i></span>Register a member
+                </p>
+                <div class="columns is-multiline is-variable is-2">
+                    <div class="column is-5">
+                        <div class="field"><label class="label">Name</label>
+                            <div class="control"><input class="input" name="name" placeholder="Ada Lovelace" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-5">
+                        <div class="field"><label class="label">Email</label>
+                            <div class="control"><input class="input" name="email" type="email"
+                                                        placeholder="ada@example.com" required></div>
+                        </div>
+                    </div>
+                    <div class="column is-2 is-flex is-align-items-flex-end">
+                        <div class="field mb-0">
+                            <div class="control">
+                                <button class="button is-info is-fullwidth"><span class="icon"><i
+                                        class="fas fa-plus"></i></span><span>Add</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                    </tr>
+                    </thead>
+                    <tbody id="members-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-loans" class="tab-pane is-hidden">
+            <form id="loan-form" class="box">
+                <p class="title is-6 mb-3"><span class="icon"><i class="fas fa-right-left"></i></span>Check out a book
+                </p>
+                <div class="columns is-multiline is-variable is-2">
+                    <div class="column is-5">
+                        <div class="field"><label class="label">Member ID</label>
+                            <div class="control"><input class="input" name="memberId" type="number" placeholder="1"
+                                                        required></div>
+                        </div>
+                    </div>
+                    <div class="column is-5">
+                        <div class="field"><label class="label">Book ID</label>
+                            <div class="control"><input class="input" name="bookId" type="number" placeholder="1"
+                                                        required></div>
+                        </div>
+                    </div>
+                    <div class="column is-2 is-flex is-align-items-flex-end">
+                        <div class="field mb-0">
+                            <div class="control">
+                                <button class="button is-info is-fullwidth"><span class="icon"><i
+                                        class="fas fa-arrow-right"></i></span><span>Checkout</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Book</th>
+                        <th>Member</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                        <th>Fee</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="loans-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-reservations" class="tab-pane is-hidden">
+            <form id="reservation-form" class="box">
+                <p class="title is-6 mb-3"><span class="icon"><i class="fas fa-clock"></i></span>Reserve a book</p>
+                <div class="columns is-multiline is-variable is-2">
+                    <div class="column is-5">
+                        <div class="field"><label class="label">Member ID</label>
+                            <div class="control"><input class="input" name="memberId" type="number" placeholder="1"
+                                                        required></div>
+                        </div>
+                    </div>
+                    <div class="column is-5">
+                        <div class="field"><label class="label">Book ID</label>
+                            <div class="control"><input class="input" name="bookId" type="number" placeholder="1"
+                                                        required></div>
+                        </div>
+                    </div>
+                    <div class="column is-2 is-flex is-align-items-flex-end">
+                        <div class="field mb-0">
+                            <div class="control">
+                                <button class="button is-info is-fullwidth"><span class="icon"><i
+                                        class="fas fa-plus"></i></span><span>Reserve</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Book</th>
+                        <th>Member</th>
+                        <th>Reserved</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="reservations-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer py-5">
+    <div class="content has-text-centered">
+        <p class="is-size-7 has-text-grey">
+            &copy; 2026 The Library &middot; Arquitectura de Software, Universidad Cat&oacute;lica del Norte.
+        </p>
+    </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

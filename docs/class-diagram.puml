@@ -1,0 +1,260 @@
+@startuml
+' Library monolith — class diagram
+' Layered: controller -> service -> dao -> model (persistence via ORMLite)
+
+skin rose
+' left to right direction
+
+skinparam package<<controller>> {
+  BackgroundColor #FCE4EC
+  BorderColor #D81B60
+}
+skinparam package<<service>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1976D2
+}
+skinparam package<<dao>> {
+  BackgroundColor #E8F5E9
+  BorderColor #388E3C
+}
+skinparam package<<model>> {
+  BackgroundColor #FFF8E1
+  BorderColor #F9A825
+}
+skinparam package<<db>> {
+  BackgroundColor #F3E5F5
+  BorderColor #7B1FA2
+}
+hide stereotype
+
+package "controller" <<controller>> {
+  class BookController {
+    - BookService service
+    - BookDao dao
+    + register(JavalinConfig) : void
+  }
+
+  class LoanController {
+    - MemberService memberService
+    - LoanService loanService
+    + register(JavalinConfig) : void
+  }
+
+  class MemberController {
+    - MemberService service
+    + register(JavalinConfig) : void
+  }
+
+  class ReservationController {
+    - ReservationService service
+    + register(JavalinConfig) : void
+  }
+}
+
+package "service" <<service>> {
+  class BookService {
+    - BookDao dao
+    + listAll() : List<Book>
+    + findById(int) : Book
+    + create(Book) : Book
+    + borrow(int) : void
+    + returnCopy(int) : void
+  }
+
+  class LoanService {
+    - {static} int DUE_DAYS = 21
+    - LoanDao loanDao
+    - BookDao bookDao
+    + findAll() : List<Loan>
+    + returnLoan(int) : Loan
+    + overdueLoans() : List<Loan>
+  }
+
+  class MemberService {
+    - MemberDao memberDao
+    - BookDao bookDao
+    - LoanDao loanDao
+    + register(Member) : Member
+    + findAll() : List<Member>
+    + checkout(int, int) : Loan
+  }
+
+  class ReservationService {
+    - ReservationDao reservationDao
+    - BookDao bookDao
+    - MemberDao memberDao
+    - LoanDao loanDao
+    + reserve(int, int) : Reservation
+    + findAll() : List<Reservation>
+    + fulfill(int) : Loan
+  }
+}
+
+package "dao" <<dao>> {
+  class BookDao {
+    - Dao<Book, Integer> dao
+    + findAll() : List<Book>
+    + findById(int) : Book
+    + create(Book) : void
+    + update(Book) : void
+    + delete(Book) : void
+  }
+
+  class MemberDao {
+    - Dao<Member, Integer> dao
+    + findAll() : List<Member>
+    + findById(int) : Member
+    + create(Member) : void
+    + update(Member) : void
+  }
+
+  class LoanDao {
+    - Dao<Loan, Integer> dao
+    + findAll() : List<Loan>
+    + findById(int) : Loan
+    + create(Loan) : void
+    + update(Loan) : void
+  }
+
+  class ReservationDao {
+    - Dao<Reservation, Integer> dao
+    + findAll() : List<Reservation>
+    + findById(int) : Reservation
+    + create(Reservation) : void
+    + update(Reservation) : void
+  }
+}
+
+package "model" <<model>> {
+  class Book {
+    - int id
+    - String title
+    - String author
+    - String isbn
+    - int totalCopies
+    - int availableCopies
+    + Book()
+    + Book(String, String, String, int)
+    + getId() : int
+    + setId(int) : void
+    + getTitle() : String
+    + setTitle(String) : void
+    + getAuthor() : String
+    + setAuthor(String) : void
+    + getIsbn() : String
+    + setIsbn(String) : void
+    + getTotalCopies() : int
+    + setTotalCopies(int) : void
+    + getAvailableCopies() : int
+    + setAvailableCopies(int) : void
+  }
+
+  class Member {
+    - int id
+    - String name
+    - String email
+    + Member()
+    + Member(String, String)
+    + getId() : int
+    + setId(int) : void
+    + getName() : String
+    + setName(String) : void
+    + getEmail() : String
+    + setEmail(String) : void
+  }
+
+  class Loan {
+    - int id
+    - Member member
+    - Book book
+    - String loanDate
+    - String dueDate
+    - String returnDate
+    - boolean returned
+    - double overdueFee
+    + Loan()
+    + Loan(Member, Book, String, String)
+    + getId() : int
+    + setId(int) : void
+    + getMember() : Member
+    + setMember(Member) : void
+    + getBook() : Book
+    + setBook(Book) : void
+    + getLoanDate() : String
+    + setLoanDate(String) : void
+    + getDueDate() : String
+    + setDueDate(String) : void
+    + getReturnDate() : String
+    + setReturnDate(String) : void
+    + isReturned() : boolean
+    + setReturned(boolean) : void
+    + getOverdueFee() : double
+    + setOverdueFee(double) : void
+  }
+
+  class Reservation {
+    - int id
+    - Member member
+    - Book book
+    - String reservedAt
+    - boolean fulfilled
+    + Reservation()
+    + Reservation(Member, Book, String)
+    + getId() : int
+    + setId(int) : void
+    + getMember() : Member
+    + setMember(Member) : void
+    + getBook() : Book
+    + setBook(Book) : void
+    + getReservedAt() : String
+    + setReservedAt(String) : void
+    + isFulfilled() : boolean
+    + setFulfilled(boolean) : void
+  }
+}
+
+package "db" <<db>> {
+  class Database {
+    - ConnectionSource connectionSource
+    + connectionSource() : ConnectionSource
+    + seedIfEmpty() : void
+  }
+}
+
+' ----- controller -> service -----
+BookController "1" --> "1" BookService
+BookController "1" --> "1" BookDao
+LoanController "1" --> "1" MemberService
+LoanController "1" --> "1" LoanService
+MemberController "1" --> "1" MemberService
+ReservationController "1" --> "1" ReservationService
+
+' ----- service -> dao -----
+BookService "1" --> "1" BookDao
+LoanService "1" --> "1" LoanDao
+LoanService "1" --> "1" BookDao
+MemberService "1" --> "1" MemberDao
+MemberService "1" --> "1" BookDao
+MemberService "1" --> "1" LoanDao
+ReservationService "1" --> "1" ReservationDao
+ReservationService "1" --> "1" BookDao
+ReservationService "1" --> "1" MemberDao
+ReservationService "1" --> "1" LoanDao
+
+' ----- dao -> model / db -----
+BookDao "1" --> "0..*" Book
+MemberDao "1" --> "0..*" Member
+LoanDao "1" --> "0..*" Loan
+ReservationDao "1" --> "0..*" Reservation
+BookDao "1" ..> "1" Database
+MemberDao "1" ..> "1" Database
+LoanDao "1" ..> "1" Database
+ReservationDao "1" ..> "1" Database
+
+' ----- model relationships -----
+Loan "0..*" --> "1" Member
+Loan "0..*" --> "1" Book
+Reservation "0..*" --> "1" Member
+Reservation "0..*" --> "1" Book
+
+@enduml
