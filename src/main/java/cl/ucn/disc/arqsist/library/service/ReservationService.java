@@ -34,7 +34,7 @@ public final class ReservationService {
     public Reservation reserve(int bookId, int memberId) throws SQLException {
         Book book = bookDao.findById(bookId);
         Member member = memberDao.findById(memberId);
-        Reservation reservation = new Reservation(member, book, LocalDate.now().toString());
+        Reservation reservation = new Reservation(member, book, LocalDate.now());
         reservationDao.create(reservation);
         return reservation;
     }
@@ -52,8 +52,8 @@ public final class ReservationService {
         reservation.setFulfilled(true);
         reservationDao.update(reservation);
 
-        String dueDate = LocalDate.now().plusDays(21).toString();
-        Loan loan = new Loan(reservation.getMember(), reservation.getBook(), LocalDate.now().toString(), dueDate);
+        LocalDate dueDate = LocalDate.now().plusDays(LoanService.DUE_DAYS); // FIXME: Using constant from LoanService
+        Loan loan = new Loan(reservation.getMember(), reservation.getBook(), LocalDate.now(), dueDate);
         loanDao.create(loan);
         return loan;
     }

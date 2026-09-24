@@ -69,13 +69,13 @@ public final class Database {
             List<Member> members = memberDao.queryForAll();
             LocalDate today = LocalDate.now();
 
-            reservationDao.create(new Reservation(members.get(0), books.get(1), today.minusDays(1).toString()));
-            reservationDao.create(new Reservation(members.get(1), books.get(0), today.minusDays(3).toString()));
+            reservationDao.create(new Reservation(members.get(0), books.get(1), today.minusDays(1)));
+            reservationDao.create(new Reservation(members.get(1), books.get(0), today.minusDays(3)));
         }
     }
 
     private void createLoan(Dao<Book, Integer> bookDao, Dao<Loan, Integer> loanDao, Member member, Book book, LocalDate loanDate, LocalDate dueDate) throws SQLException {
-        loanDao.create(new Loan(member, book, loanDate.toString(), dueDate.toString()));
+        loanDao.create(new Loan(member, book, loanDate, dueDate));
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookDao.update(book);
     }

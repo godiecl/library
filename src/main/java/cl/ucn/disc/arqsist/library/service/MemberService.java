@@ -43,8 +43,12 @@ public final class MemberService {
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookDao.update(book);
 
-        String dueDate = LocalDate.now().plusDays(14).toString();
-        Loan loan = new Loan(member, book, LocalDate.now().toString(), dueDate);
+        // Today date:
+        LocalDate today = LocalDate.now();
+        // Due date:
+        LocalDate dueDate = today.plusDays(LoanService.DUE_DAYS); // FIXME: Using constant from LoanService
+
+        Loan loan = new Loan(member, book, today, dueDate);
         loanDao.create(loan);
         return loan;
     }
