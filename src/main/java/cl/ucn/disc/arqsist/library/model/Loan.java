@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Arquitectura de Sistemas, DISC, UCN, Antofagasta.
+ */
+
 package cl.ucn.disc.arqsist.library.model;
 
 import com.j256.ormlite.field.DatabaseField;
