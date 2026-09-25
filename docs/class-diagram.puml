@@ -1,5 +1,5 @@
 @startuml
-' Library monolith — class diagram
+' Library monolith: class diagram
 ' Layered: controller -> service -> dao -> model (persistence via ORMLite)
 
 skin rose
@@ -31,22 +31,26 @@ package "controller" <<controller>> {
   class BookController {
     - BookService service
     - BookDao dao
+    + BookController(BookService, BookDao)
     + register(JavalinConfig) : void
   }
 
   class LoanController {
     - MemberService memberService
     - LoanService loanService
+    + LoanController(MemberService, LoanService)
     + register(JavalinConfig) : void
   }
 
   class MemberController {
     - MemberService service
+    + MemberController(MemberService)
     + register(JavalinConfig) : void
   }
 
   class ReservationController {
     - ReservationService service
+    + ReservationController(ReservationService)
     + register(JavalinConfig) : void
   }
 }
@@ -54,6 +58,7 @@ package "controller" <<controller>> {
 package "service" <<service>> {
   class BookService {
     - BookDao dao
+    + BookService(BookDao)
     + listAll() : List<Book>
     + findById(int) : Book
     + create(Book) : Book
@@ -62,9 +67,10 @@ package "service" <<service>> {
   }
 
   class LoanService {
-    - {static} int DUE_DAYS = 21
+    + {static} int DUE_DAYS = 21
     - LoanDao loanDao
     - BookDao bookDao
+    + LoanService(LoanDao, BookDao)
     + findAll() : List<Loan>
     + returnLoan(int) : Loan
     + overdueLoans() : List<Loan>
@@ -74,6 +80,7 @@ package "service" <<service>> {
     - MemberDao memberDao
     - BookDao bookDao
     - LoanDao loanDao
+    + MemberService(MemberDao, BookDao, LoanDao)
     + register(Member) : Member
     + findAll() : List<Member>
     + checkout(int, int) : Loan
@@ -84,6 +91,7 @@ package "service" <<service>> {
     - BookDao bookDao
     - MemberDao memberDao
     - LoanDao loanDao
+    + ReservationService(ReservationDao, BookDao, MemberDao, LoanDao)
     + reserve(int, int) : Reservation
     + findAll() : List<Reservation>
     + fulfill(int) : Loan
@@ -93,6 +101,7 @@ package "service" <<service>> {
 package "dao" <<dao>> {
   class BookDao {
     - Dao<Book, Integer> dao
+    + BookDao(ConnectionSource)
     + findAll() : List<Book>
     + findById(int) : Book
     + create(Book) : void
@@ -102,6 +111,7 @@ package "dao" <<dao>> {
 
   class MemberDao {
     - Dao<Member, Integer> dao
+    + MemberDao(ConnectionSource)
     + findAll() : List<Member>
     + findById(int) : Member
     + create(Member) : void
@@ -110,6 +120,7 @@ package "dao" <<dao>> {
 
   class LoanDao {
     - Dao<Loan, Integer> dao
+    + LoanDao(ConnectionSource)
     + findAll() : List<Loan>
     + findById(int) : Loan
     + create(Loan) : void
@@ -118,6 +129,7 @@ package "dao" <<dao>> {
 
   class ReservationDao {
     - Dao<Reservation, Integer> dao
+    + ReservationDao(ConnectionSource)
     + findAll() : List<Reservation>
     + findById(int) : Reservation
     + create(Reservation) : void
@@ -167,25 +179,25 @@ package "model" <<model>> {
     - int id
     - Member member
     - Book book
-    - String loanDate
-    - String dueDate
-    - String returnDate
+    - LocalDate loanDate
+    - LocalDate dueDate
+    - LocalDate returnDate
     - boolean returned
     - double overdueFee
     + Loan()
-    + Loan(Member, Book, String, String)
+    + Loan(Member, Book, LocalDate, LocalDate)
     + getId() : int
     + setId(int) : void
     + getMember() : Member
     + setMember(Member) : void
     + getBook() : Book
     + setBook(Book) : void
-    + getLoanDate() : String
-    + setLoanDate(String) : void
-    + getDueDate() : String
-    + setDueDate(String) : void
-    + getReturnDate() : String
-    + setReturnDate(String) : void
+    + getLoanDate() : LocalDate
+    + setLoanDate(LocalDate) : void
+    + getDueDate() : LocalDate
+    + setDueDate(LocalDate) : void
+    + getReturnDate() : LocalDate
+    + setReturnDate(LocalDate) : void
     + isReturned() : boolean
     + setReturned(boolean) : void
     + getOverdueFee() : double
@@ -196,18 +208,18 @@ package "model" <<model>> {
     - int id
     - Member member
     - Book book
-    - String reservedAt
+    - LocalDate reservedAt
     - boolean fulfilled
     + Reservation()
-    + Reservation(Member, Book, String)
+    + Reservation(Member, Book, LocalDate)
     + getId() : int
     + setId(int) : void
     + getMember() : Member
     + setMember(Member) : void
     + getBook() : Book
     + setBook(Book) : void
-    + getReservedAt() : String
-    + setReservedAt(String) : void
+    + getReservedAt() : LocalDate
+    + setReservedAt(LocalDate) : void
     + isFulfilled() : boolean
     + setFulfilled(boolean) : void
   }
@@ -216,8 +228,19 @@ package "model" <<model>> {
 package "db" <<db>> {
   class Database {
     - ConnectionSource connectionSource
+    + Database(String)
     + connectionSource() : ConnectionSource
     + seedIfEmpty() : void
+  }
+
+  class LocalDatePersister {
+    - {static} LocalDatePersister SINGLETON
+    - LocalDatePersister()
+    + {static} getSingleton() : LocalDatePersister
+    + parseDefaultString(FieldType, String) : Object
+    + resultToSqlArg(FieldType, DatabaseResults, int) : Object
+    + sqlArgToJava(FieldType, Object, int) : Object
+    + javaToSqlArg(FieldType, Object) : Object
   }
 }
 
@@ -241,20 +264,20 @@ ReservationService "1" --> "1" BookDao
 ReservationService "1" --> "1" MemberDao
 ReservationService "1" --> "1" LoanDao
 
-' ----- dao -> model / db -----
+' ----- dao -> model -----
 BookDao "1" --> "0..*" Book
 MemberDao "1" --> "0..*" Member
 LoanDao "1" --> "0..*" Loan
 ReservationDao "1" --> "0..*" Reservation
-BookDao "1" ..> "1" Database
-MemberDao "1" ..> "1" Database
-LoanDao "1" ..> "1" Database
-ReservationDao "1" ..> "1" Database
 
 ' ----- model relationships -----
 Loan "0..*" --> "1" Member
 Loan "0..*" --> "1" Book
 Reservation "0..*" --> "1" Member
 Reservation "0..*" --> "1" Book
+
+' ----- model -> db -----
+Loan --> LocalDatePersister : <<uses>>
+Reservation --> LocalDatePersister : <<uses>>
 
 @enduml
