@@ -64,7 +64,7 @@ The table below lists the 16 changes. The Stage column gives the stage that appl
 |--------|-------|----------------------|------------------------------------------------|-------|
 | 1      | 1, 2  | all files            | Add license header and javadoc                 | ✅    |
 | 2      | 1     | dates                | Store dates as `LocalDate`                     | ✅    |
-| 3      | 1     | policy               | Add `LoanPolicy`                               | ☐    |
+| 3      | 1     | policy               | Add `LoanPolicy`                               | ✅    |
 | 4      | 1     | errors               | Add `NotFoundException`                        | ☐    |
 | 5      | 1     | DAO                  | Add `BaseDao`, simplify the four DAOs          | ☐    |
 | 6      | 1     | `BookService`        | Guard the inventory                            | ☐    |

@@ -76,6 +76,13 @@ package "service" <<service>> {
     + overdueLoans() : List<Loan>
   }
 
+  class LoanPolicy {
+    + {static} int DUE_DAYS = 21
+    + {static} double FEE_PER_DAY = 1.0
+    - LoanPolicy()
+    + {static} dueDate(LocalDate) : LocalDate
+  }
+
   class MemberService {
     - MemberDao memberDao
     - BookDao bookDao
@@ -264,6 +271,10 @@ ReservationService "1" --> "1" BookDao
 ReservationService "1" --> "1" MemberDao
 ReservationService "1" --> "1" LoanDao
 
+' ----- service -> policy -----
+MemberService ..> LoanPolicy : <<uses>>
+ReservationService ..> LoanPolicy : <<uses>>
+
 ' ----- dao -> model -----
 BookDao "1" --> "0..*" Book
 MemberDao "1" --> "0..*" Member
@@ -277,7 +288,7 @@ Reservation "0..*" --> "1" Member
 Reservation "0..*" --> "1" Book
 
 ' ----- model -> db -----
-Loan --> LocalDatePersister : <<uses>>
-Reservation --> LocalDatePersister : <<uses>>
+Loan ..> LocalDatePersister : <<uses>>
+Reservation ..> LocalDatePersister : <<uses>>
 
 @enduml
