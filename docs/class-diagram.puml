@@ -103,6 +103,10 @@ package "service" <<service>> {
     + findAll() : List<Reservation>
     + fulfill(int) : Loan
   }
+
+  class NotFoundException {
+    + NotFoundException(String)
+  }
 }
 
 package "dao" <<dao>> {
