@@ -20,8 +20,16 @@ import cl.ucn.disc.arqsist.library.service.ReservationService;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 
+/**
+ * The main class of the application.
+ */
 public final class App {
 
+    /**
+     * The main method of the application.
+     *
+     * @throws Exception in case of any error.
+     */
     public static void main(String[] args) throws Exception {
         Database db = new Database("jdbc:sqlite:database.sqlite");
         db.seedIfEmpty();
